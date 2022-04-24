@@ -123,7 +123,7 @@ elif args[1] == 'PUT':
         data = f.read()
         clientSocket.send(data)
             
-
+    #Get response on succesful/unseccesful attempt
     reply = clientSocket.recv(BUFFER_SIZE).decode()
     print(reply)
 
