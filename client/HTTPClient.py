@@ -8,11 +8,11 @@ import os
 args = sys.argv
 BUFFER_SIZE = 1024
 SEPERATOR = "<SEPERATOR>"
-timeInfo = ("%s, %s %s %s %s %s" %(datetime.now().strftime('%a'), datetime.now().strftime('%d'), datetime.now().strftime('%b'), datetime.now().strftime('%Y'), datetime.now().strftime("%H:%M:%S"), datetime.now(timezone.utc).astimezone().tzname()))
+timeInfo = ("%s, %s %s %s %s" %(datetime.now().strftime('%a'), datetime.now().strftime('%d'), datetime.now().strftime('%b'), datetime.now().strftime('%Y'), datetime.now().strftime("%H:%M:%S")))
 
 # Checking number of arguments
 if(len(args) > 4 or len(args) < 2 ):
-    print("Usage: python HTTPClient.py [PUT] URL [FILEPATH]")
+    print("Usage: python HTTPClient.py [PUT] URL/ [FILEPATH]")
     exit()
 
 # If len(args) = 2, we are doing a GET request
@@ -104,11 +104,15 @@ elif args[1] == 'PUT':
     clientSocket = socket(AF_INET, SOCK_STREAM)
     clientSocket.connect((hostname, int(port)))
 
-    clientSocket.sendall(f"PUT {path} {filename}".encode())
+    request = ("PUT %s HTTP/1.1\r\nHost: %s\r\nTime: %s\r\nClass-name: VCU-CMSC440-2022\r\nUser-name: justinyork\r\n\r\n" % ((path + "/" +filename), ":".join([hostname,port]), timeInfo))
+    print(request)
+    clientSocket.sendall(request.encode())
+    
+    #clientSocket.sendall(("PUT %s %s" % (path, filename)).encode())
     
     #Wait for response with filename
     msg = clientSocket.recv(BUFFER_SIZE).decode()
-    print(f"[SERVER] {msg}")
+    print("[SERVER] %s" % msg)
 
     with open(args[3], "rb") as f:
         data = f.read()
@@ -122,5 +126,5 @@ elif args[1] == 'PUT':
     
 
 else:
-    print("Usage: python HTTPClient.py [PUT] URL [FILEPATH]")
+    print("Usage: python HTTPClient.py [PUT] URL/ [FILEPATH]")
     exit()

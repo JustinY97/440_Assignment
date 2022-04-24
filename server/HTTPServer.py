@@ -7,12 +7,17 @@ args = sys.argv
 if len(args) != 2:
     print("Usage: python HTTPServer.py port")
     exit()
-port = int(args[1])
+
+try:
+    port = int(args[1])
+except:
+    print("ERR: - arg 2")
+    exit()
 
 #Create Welcoming Socket using port
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(('0.0.0.0', port))
-serverSocket.listen()
+serverSocket.listen(5)
 
 
 print("Listening on port: %d ..." % port)
@@ -29,33 +34,42 @@ try:
         clientSentence = conn.recv(BUFFER_SIZE).decode()
         if clientSentence[0:3] == "GET":
 
-            print(f"[CLIENT] {clientSentence}")
+            print("[CLIENT] %s" % clientSentence)
 
             file = clientSentence.split("HTTP/1.1")[0]
             file = file.strip("GET")
             file = file.strip()
 
-            f = open(file)
-
+            try:
+                f = open(file)
+            except:
+                conn.send("[SERVER] ERR: File Not Found.")
+                continue
             serverSentence = f.read()
             
             conn.send(serverSentence.encode())
 
         elif clientSentence[0:3] == "PUT":
 
-            print(f"[CLIENT] {clientSentence}")
+            print("[CLIENT] %s" % clientSentence)
 
-            clientSentence = clientSentence.strip("PUT ")
-            
-            arguments = clientSentence.split(" ")
+            clientSentence = clientSentence.split("HTTP/1.1")[0]
+            clientSentence = clientSentence.strip("PUT")
+            clientSentence = clientSentence.strip()
 
-            filepath = arguments[0]
-            filename = arguments[1]
+            arguments = clientSentence.split("/")
 
-            conn.send(f"Creating File: {filename}".encode())
+            if len(arguments) == 1:
+                filename = arguments[0]
+                filepath = "./"
+            else:
+                filename = arguments.pop()
+                filepath = "/".join(arguments)
+
+            conn.send(("Creating File: %s" % filename).encode())
 
             if not os.path.exists(filepath):
-                    os.mkdir(filepath)       
+                    os.makedirs(filepath)       
             
             with open(os.path.join(filepath,filename), "w") as f:
                 
@@ -64,10 +78,10 @@ try:
 
             #Check if file was created
             if os.path.exists(os.path.join(filepath, filename)):
-                print(f"[SERVER] STATUS 200: OK File {filename} created.")   
-                conn.send(f"[SERVER] STATUS 200: OK File {filename} created.".encode())
+                print("[SERVER] STATUS 200: OK File %s created." % filename)   
+                conn.send(("[SERVER] STATUS 200: OK File %s created." %filename).encode())
             else:
-                conn.send(b"STATUS 600: File Not Created")
+                conn.send(b"[SERVER] STATUS 600: FAILED File NOT Created")
                     
                     
         else:
