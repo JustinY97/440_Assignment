@@ -1,3 +1,8 @@
+'''
+Programmer: Justin York
+Date: 04/24/2022
+Description: Client program for sockets project!
+'''
 from datetime import *
 from socket import *
 import sys
@@ -107,7 +112,7 @@ elif args[1] == 'PUT':
     request = ("PUT %s HTTP/1.1\r\nHost: %s\r\nTime: %s\r\nClass-name: VCU-CMSC440-2022\r\nUser-name: justinyork\r\n\r\n" % ((path + "/" +filename), ":".join([hostname,port]), timeInfo))
     print(request)
     clientSocket.sendall(request.encode())
-    
+
     #clientSocket.sendall(("PUT %s %s" % (path, filename)).encode())
     
     #Wait for response with filename

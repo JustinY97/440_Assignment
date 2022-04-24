@@ -1,3 +1,8 @@
+'''
+Programmer: Justin York
+Date: 04/24/2022
+Description: Server program for sockets project!
+'''
 import os
 from socket import *
 import sys
